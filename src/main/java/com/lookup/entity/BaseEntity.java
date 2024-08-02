@@ -29,5 +29,6 @@ public abstract class BaseEntity {
   @Column(name = "created_date", nullable = false, columnDefinition = "timestamp default current_timestamp")
   private LocalDateTime createdDate;
 
+  @Column(nullable = false, columnDefinition = "boolean default true")
   private boolean active;
 }
