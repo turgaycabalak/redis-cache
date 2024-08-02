@@ -3,9 +3,8 @@ package com.lookup.dto.response;
 import lombok.Builder;
 
 @Builder
-public record CountryResponse(
+public record CategoryResponse(
     Long id,
-    String name,
-    String capital
+    String name
 ) {
 }

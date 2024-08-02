@@ -43,5 +43,4 @@ public class CountryService {
     countryById.setActive(false);
     countryRepository.save(countryById);
   }
-
 }
