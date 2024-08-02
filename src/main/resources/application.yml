@@ -1,3 +1,5 @@
+server:
+  port: 4070
 spring:
   application:
     name: lookup-redis

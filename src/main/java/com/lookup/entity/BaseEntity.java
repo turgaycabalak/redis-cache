@@ -7,6 +7,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,5 +32,23 @@ public abstract class BaseEntity {
   private LocalDateTime createdDate;
 
   @Column(nullable = false, columnDefinition = "boolean default true")
-  private boolean active;
+  private Boolean active;
+
+  @PrePersist
+  public void prePersist() {
+    if (createdDate == null) {
+      this.createdDate = LocalDateTime.now();
+    }
+    if (lastUpdated == null) {
+      this.lastUpdated = LocalDateTime.now();
+    }
+    if (active == null) {
+      this.active = true;
+    }
+  }
+
+  @PreUpdate
+  public void preUpdate() {
+    this.lastUpdated = LocalDateTime.now();
+  }
 }
