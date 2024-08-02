@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: lookup-redis
+  datasource:
+    url: jdbc:postgresql://10.34.100.12:5532/postgres
+    username: multiservice
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: '2'
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        default_schema: lookup-redis
+        hbm2ddl:
+          create_namespaces: true
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  cache:
+    type: redis
+    redis:
+      enable-statistics: true
+      time-to-live: PT3600S
+      key-prefix: lookup-
+  data:
+    redis:
+      host: 10.34.100.12
+      port: 6379
+      password: 123456
