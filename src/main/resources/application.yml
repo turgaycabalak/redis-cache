@@ -4,7 +4,7 @@ spring:
   application:
     name: lookup-redis
   datasource:
-    url: jdbc:postgresql://10.34.100.12:5532/postgres
+    url: jdbc:postgresql://localhost:5432/postgres
     username: multiservice
     password: 123456
     driver-class-name: org.postgresql.Driver
@@ -29,6 +29,6 @@ spring:
       key-prefix: lookup-
   data:
     redis:
-      host: 10.34.100.12
+      host: localhost
       port: 6379
       password: 123456

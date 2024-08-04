@@ -1,5 +1,6 @@
 package com.lookup.entity;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -20,7 +21,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @MappedSuperclass
 @NoArgsConstructor
-public abstract class BaseEntity {
+public abstract class BaseEntity implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
