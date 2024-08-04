@@ -25,6 +25,18 @@ public class CacheService {
   private final ObjectMapper objectMapper;
   private String idFieldName = "id";
 
+  public void deleteFromCache(String tableKey, String id) {
+    redisTemplate.opsForHash().delete(tableKey, id);
+  }
+
+  public <R, E extends BaseEntity> R updateCahce(String tableKey,
+                                                 E entity,
+                                                 Class<R> rClass) {
+    R response = objectMapper.convertValue(entity, rClass);
+    cacheEntries(tableKey, List.of(response));
+
+    return response;
+  }
 
   public <R, E extends BaseEntity> R getById(String tableKey,
                                              Long id,
