@@ -1,16 +1,13 @@
 package com.lookup.controller;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lookup.dto.request.CountryCreateRequest;
 import com.lookup.dto.request.CountryUpdateRequest;
 import com.lookup.dto.response.CountryResponse;
 import com.lookup.entity.Country;
 import com.lookup.mapper.CountryMapper;
+import com.lookup.service.CacheService;
 import com.lookup.service.CountryService;
 
 import lombok.RequiredArgsConstructor;
@@ -35,44 +32,18 @@ public class CountryController {
   private static final String TABLE_KEY = "Country";
   private final CountryService countryService;
   private final RedisTemplate<String, Object> redisTemplate;
-  private final ObjectMapper objectMapper;
+  private final CacheService cacheService;
 
 
   @GetMapping
   public List<CountryResponse> getAllCountries() {
-    Map<Object, Object> entriesCache = redisTemplate.opsForHash().entries(TABLE_KEY);
-    long dbCount = countryService.getCount();
-
-    if (!entriesCache.isEmpty() && (dbCount == entriesCache.size())) {
-      List<Object> list = entriesCache.values().stream().toList();
-      return list.stream()
-          .map(o -> objectMapper.convertValue(o, CountryResponse.class))
-          .sorted(Comparator.comparingLong(CountryResponse::id))
-          .toList();
-    }
-
-    redisTemplate.delete(TABLE_KEY);
-
-    List<Country> allCountries = countryService.getAllCountries();
-    List<CountryResponse> dtoList = CountryMapper.INSTANCE.toDtoList(allCountries);
-
-    dtoList.forEach(c -> redisTemplate.opsForHash().put(TABLE_KEY, c.id().toString(), c));
-    redisTemplate.expire(TABLE_KEY, 30, TimeUnit.MINUTES);
-
-    return dtoList;
+    return cacheService.getAll(TABLE_KEY, countryService::getCount, countryService::getAllCountries,
+        CountryResponse.class);
   }
 
   @GetMapping("/{id}")
   public CountryResponse getCountryById(@PathVariable Long id) {
-    Object o = redisTemplate.opsForHash().get(TABLE_KEY, id.toString());
-    if (o != null) {
-      return objectMapper.convertValue(o, CountryResponse.class);
-    }
-
-    Country countryById = countryService.getCountryById(id);
-    CountryResponse dto = CountryMapper.INSTANCE.toDto(countryById);
-    redisTemplate.opsForHash().put(TABLE_KEY, dto.id().toString(), dto);
-    return dto;
+    return cacheService.getById(TABLE_KEY, id, countryService::getCountryById, CountryResponse.class);
   }
 
   @PostMapping
