@@ -1,11 +1,8 @@
 package com.lookup.config;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import org.springframework.cache.interceptor.KeyGenerator;
@@ -22,6 +19,15 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
   @Bean
+  public ObjectMapper getObjectMapper() {
+    ObjectMapper objectMapper = new ObjectMapper();
+    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    objectMapper.registerModule(new JavaTimeModule()); // Register the JavaTimeModule to handle LocalDateTime
+    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // Optional: Write dates as ISO strings
+    return objectMapper;
+  }
+
+  @Bean
   public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
     RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
     redisTemplate.setConnectionFactory(connectionFactory);
@@ -32,15 +38,8 @@ public class RedisConfig {
     redisTemplate.setHashKeySerializer(stringSerializer);
 
     // Value and Hash Value serializers
-    ObjectMapper objectMapper = new ObjectMapper();
     Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer =
-        new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
-
-    objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-    objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL,
-        JsonTypeInfo.As.PROPERTY);
-    objectMapper.registerModule(new JavaTimeModule()); // Register the JavaTimeModule to handle LocalDateTime
-    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // Optional: Write dates as ISO strings
+        new Jackson2JsonRedisSerializer<>(getObjectMapper(), Object.class);
 
     redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
     redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);

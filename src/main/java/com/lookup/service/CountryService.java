@@ -17,6 +17,10 @@ import org.springframework.stereotype.Service;
 public class CountryService {
   private final CountryRepository countryRepository;
 
+  public long getCount() {
+    return countryRepository.count();
+  }
+
   public List<Country> getAllCountries() {
     return countryRepository.findAll();
   }
