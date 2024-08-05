@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,14 +41,20 @@ public class CategoryService {
     return categoryRepository.save(entity);
   }
 
-  @CacheEvict(cacheNames = "categories", allEntries = true)
+  @Caching(evict = {
+      @CacheEvict(cacheNames = "categories", allEntries = true),
+      @CacheEvict(cacheNames = "category", key = "#request.id()")
+  })
   public Category updateCategoryById(CategoryUpdateRequest request) {
     Category categoryById = getCategoryEntity(request.id());
     categoryById.setName(request.name());
     return categoryRepository.save(categoryById);
   }
 
-  @CacheEvict(cacheNames = "categories", allEntries = true)
+  @Caching(evict = {
+      @CacheEvict(cacheNames = "categories", allEntries = true),
+      @CacheEvict(cacheNames = "category", key = "#id")
+  })
   public void deleteCategoryById(Long id) {
     Category categoryById = getCategoryEntity(id);
     categoryById.setActive(false);
