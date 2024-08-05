@@ -29,7 +29,7 @@ public class CacheService {
     redisTemplate.opsForHash().delete(tableKey, id);
   }
 
-  public <R, E extends BaseEntity> R updateCahce(String tableKey,
+  public <R, E extends BaseEntity> R updateCache(String tableKey,
                                                  E entity,
                                                  Class<R> rClass) {
     R response = objectMapper.convertValue(entity, rClass);

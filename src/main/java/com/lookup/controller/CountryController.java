@@ -1,7 +1,10 @@
 package com.lookup.controller;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lookup.dto.request.CountryCreateRequest;
 import com.lookup.dto.request.CountryUpdateRequest;
 import com.lookup.dto.response.CountryResponse;
@@ -11,6 +14,7 @@ import com.lookup.service.CountryService;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +34,26 @@ public class CountryController {
   private static final String TABLE_KEY = "Country";
   private final CountryService countryService;
   private final CacheService cacheService;
+  private final RedisTemplate<String, Object> redisTemplate;
+  private final ObjectMapper objectMapper;
 
+  @GetMapping
+  public List<CountryResponse> getAllCountriesTest() {
+    Map<Object, Object> entries = redisTemplate.opsForHash().entries("Country");
+    List<CountryResponse> list = entries.values().stream()
+        .map(o -> objectMapper.convertValue(o, CountryResponse.class))
+        .sorted(Comparator.comparingLong(CountryResponse::id))
+        .toList();
+
+    return list;
+  }
+
+  @GetMapping("/{id}")
+  public CountryResponse getCountryByIdTest(@PathVariable Long id) {
+    Object o = redisTemplate.opsForHash().get("Country", id.toString());
+    CountryResponse countryResponse = objectMapper.convertValue(o, CountryResponse.class);
+    return countryResponse;
+  }
 
   @GetMapping
   public List<CountryResponse> getAllCountries() {
@@ -46,13 +69,13 @@ public class CountryController {
   @PostMapping
   public CountryResponse saveCountry(@RequestBody CountryCreateRequest request) {
     Country country = countryService.saveCountry(request);
-    return cacheService.updateCahce(TABLE_KEY, country, CountryResponse.class);
+    return cacheService.updateCache(TABLE_KEY, country, CountryResponse.class);
   }
 
   @PutMapping
   public CountryResponse updateCountryById(@RequestBody CountryUpdateRequest request) {
     Country country = countryService.updateCountryById(request);
-    return cacheService.updateCahce(TABLE_KEY, country, CountryResponse.class);
+    return cacheService.updateCache(TABLE_KEY, country, CountryResponse.class);
   }
 
   @DeleteMapping("/{id}")
