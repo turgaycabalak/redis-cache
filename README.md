@@ -50,7 +50,7 @@ Ensure that Redis is running on your local machine or configure the application 
    ```bash
    mvn spring-boot:run
   
-The application will start and be accessible at <b>`http://localhost:8080`.<b>
+The application will start and be accessible at <b>`http://localhost:4070`.<b>
 
 ## API Endpoints
 
